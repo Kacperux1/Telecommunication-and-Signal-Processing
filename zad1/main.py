@@ -43,7 +43,8 @@ def decode(coded_message):
 
 
 def main():
-    message = "Ala ma kota"
+    with open("wiadomosc.txt", "r", encoding="ascii") as file:
+        message = file.read()
     print(message)
     coded_message = encode(message)
     coded_message[2][6] = 1 - coded_message[2][6]
