@@ -39,10 +39,14 @@ def is_correct(encoded_message):
         #sprawdź, czy jest błąd
         syndrome = np.dot(h_matrix, codeword) % 2
         if any(syndrome):
+            # Jeśli syndrom nie jest zerowy, naprawiamy błąd
+            error_position = None
             for i in range(16):
                 if np.array_equal(h_matrix[:, i], syndrome):
                     codeword[i] = 1 - codeword[i]  # naprawa błędu
                     break
+            if error_position is not None:
+                codeword[error_position] = 1 - codeword[error_position]  # Naprawa błędu
         decoded.append(codeword[:8])
     return decoded
 
@@ -64,6 +68,10 @@ def decode(coded_message):
 
 
 def main():
+    filename = input("Podaj nazwę pliku:")
+    print("wprowadzony plik: "+filename)
+    if not filename.endswith(".txt"):
+        raise ValueError("Niewłaściwy format pliku!")
     # wczytanie pliku
     with open("wiadomosc.txt", "r", encoding="ascii") as file:
         message = file.read()
@@ -73,14 +81,17 @@ def main():
     coded_message = encode(message)
     # popsucie wiadomości
     coded_message[2][6] = 1 - coded_message[2][6]
-    coded_message[3][3] = 1 - coded_message[3][3]
-    coded_message[1][1] = 1 - coded_message[1][1]
+    coded_message[2][7] = 1 - coded_message[2][7]
+    #coded_message[3][3] = 1 - coded_message[3][3]
+    #coded_message[1][1] = 1 - coded_message[1][1]
     # kontrolne wyświetlenie popsutej wiadomości
     print(decode(coded_message))
     # sprawdzenie i korekcja błędów
     decoded_message = decode(is_correct(coded_message))
     # wyświetl prawidłową wiadomość
     print(decoded_message)
-
+    with open("wiadomosc_wynikowa.txt", "w", encoding="ascii") as file:
+        file.write(decoded_message)
 
 main()
+
