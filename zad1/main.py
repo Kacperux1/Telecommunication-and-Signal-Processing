@@ -39,13 +39,39 @@ def is_correct(encoded_message):
         #sprawdź, czy jest błąd
         syndrome = np.dot(h_matrix, codeword) % 2
         if any(syndrome):
-            for i in range(16):
-                if np.array_equal(h_matrix[:, i], syndrome):
-                    codeword[i] = 1 - codeword[i]  # naprawa błędu
-                    break
+            error_position = find_single_error(syndrome)
+
+            if error_position is not None:
+                codeword[error_position] = 1 - codeword[error_position]
+            else:
+                error_pattern = find_two_errors(syndrome)
+                if error_pattern:
+                    codeword = correct_two_errors(codeword, error_pattern)
+
         decoded.append(codeword[:8])
     return decoded
 
+def find_single_error(syndrome):
+    # Szukamy pojedynczego błędu
+    for i in range(16):
+        if np.array_equal(syndrome, h_matrix[:, i]):
+            return i  # Pozycja błędu
+    return None  # Jeśli nie znaleziono pojedynczego błędu
+
+def find_two_errors(syndrome):
+    # Szukamy dwóch błędów poprzez sprawdzenie XOR dwóch kolumn
+    for i in range(16):
+        for j in range(i + 1, 16):
+            if np.array_equal(syndrome, np.bitwise_xor(h_matrix[:, i], h_matrix[:, j])):
+                #print(i," ", j)
+                return [i, j]  # Pozycje błędów
+    return None  # Jeśli nie znaleziono dwóch błędów
+
+def correct_two_errors(codeword, error_pattern):
+    # Korygujemy dwa błędy
+    for index in error_pattern:
+        codeword[index] = 1 - codeword[index]  # Zmieniamy bit
+    return codeword
 
 # funkcja DEKODUJ
 # parametry wejścia:
@@ -72,9 +98,14 @@ def main():
     # dodanie bitów kontrolnych
     coded_message = encode(message)
     # popsucie wiadomości
-    coded_message[2][6] = 1 - coded_message[2][6]
+    #print(coded_message[2])
+    coded_message[2][1] = 1 - coded_message[2][1]
+    coded_message[2][3] = 1 - coded_message[2][3]
     coded_message[3][3] = 1 - coded_message[3][3]
     coded_message[1][1] = 1 - coded_message[1][1]
+    coded_message[7][3] = 1 - coded_message[7][3]
+    coded_message[7][5] = 1 - coded_message[7][5]
+    #print(coded_message[2])
     # kontrolne wyświetlenie popsutej wiadomości
     print(decode(coded_message))
     # sprawdzenie i korekcja błędów
