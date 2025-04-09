@@ -90,6 +90,10 @@ def decode(coded_message):
 
 
 def main():
+    filename = input("Podaj nazwę pliku:")
+    print("wprowadzony plik: "+filename)
+    if not filename.endswith(".txt"):
+        raise ValueError("Niewłaściwy format pliku!")
     # wczytanie pliku
     with open("wiadomosc.txt", "r", encoding="ascii") as file:
         message = file.read()
@@ -112,6 +116,8 @@ def main():
     decoded_message = decode(is_correct(coded_message))
     # wyświetl prawidłową wiadomość
     print(decoded_message)
-
+    with open("wiadomosc_wynikowa.txt", "w", encoding="ascii") as file:
+        file.write(decoded_message)
 
 main()
+
