@@ -34,32 +34,43 @@ def encode(message):
 # @encoded_message - macierz Nx16 reprezentujaca zakodowaną wiadomość z bitami kontrolnymi
 # ZWRÓĆ: sprawdzona (i ewentualnie poprawiona) wiadomość
 def is_correct(encoded_message):
+    znak = 1
     decoded = []
     for codeword in encoded_message:
         #sprawdź, czy jest błąd
         syndrome = np.dot(h_matrix, codeword) % 2
         if any(syndrome):
+            #jeżeli syndrom rozny od 0 sprawdzamy czy jest pojedynczy bład
             error_position = find_single_error(syndrome)
 
             if error_position is not None:
+                #jeżeli błąd jest pojedynczy naprawiamy go normalnie
                 codeword[error_position] = 1 - codeword[error_position]
             else:
+                #jeżeli nie zanleziono błędu pojedynczego to szykamy podwójnego
                 error_pattern = find_two_errors(syndrome)
                 if error_pattern:
+                    #jeżeli lista (error_pattern) nie jest pusta to znaleziono błąd podwójny i go naprawiamy
                     codeword = correct_two_errors(codeword, error_pattern)
+                #jeżeli syndrom!=0 ale nie ma błędu pojedynczego ani podwójnego no to nie umiemy go naprawić
+                else:
+                    print()
+                    print("Znalazłem błąd w", znak, "znaku ale niestety nie umiem tego naprawić :( ")
+                    print()
 
         decoded.append(codeword[:8])
+        znak = znak+1
     return decoded
 
 def find_single_error(syndrome):
-    # Szukamy pojedynczego błędu
+    # Szukamy pojedynczego błędu czyli czy syndrom to jedna z kolum w macierzy
     for i in range(16):
         if np.array_equal(syndrome, h_matrix[:, i]):
             return i  # Pozycja błędu
     return None  # Jeśli nie znaleziono pojedynczego błędu
 
 def find_two_errors(syndrome):
-    # Szukamy dwóch błędów poprzez sprawdzenie XOR dwóch kolumn
+    # Szukamy dwóch błędów poprzez sprawdzenie czy syndrom to XOR dwóch kolumn
     for i in range(16):
         for j in range(i + 1, 16):
             if np.array_equal(syndrome, np.bitwise_xor(h_matrix[:, i], h_matrix[:, j])):
@@ -109,6 +120,7 @@ def main():
     coded_message[1][1] = 1 - coded_message[1][1]
     coded_message[7][3] = 1 - coded_message[7][3]
     coded_message[7][5] = 1 - coded_message[7][5]
+    #coded_message[7][7] = 1 - coded_message[7][7]
     #print(coded_message[2])
     # kontrolne wyświetlenie popsutej wiadomości
     print(decode(coded_message))
@@ -116,6 +128,7 @@ def main():
     decoded_message = decode(is_correct(coded_message))
     # wyświetl prawidłową wiadomość
     print(decoded_message)
+
     with open("wiadomosc_wynikowa.txt", "w", encoding="ascii") as file:
         file.write(decoded_message)
 
