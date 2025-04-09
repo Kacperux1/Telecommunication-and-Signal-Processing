@@ -113,15 +113,18 @@ def main():
     # dodanie bitów kontrolnych
     coded_message = encode(message)
     # popsucie wiadomości
-    #print(coded_message[2])
     coded_message[2][1] = 1 - coded_message[2][1]
     coded_message[2][3] = 1 - coded_message[2][3]
+
     coded_message[3][3] = 1 - coded_message[3][3]
+
     coded_message[1][1] = 1 - coded_message[1][1]
+
+    coded_message[7][1] = 1 - coded_message[7][1]
+    coded_message[7][2] = 1 - coded_message[7][2]
     coded_message[7][3] = 1 - coded_message[7][3]
-    coded_message[7][5] = 1 - coded_message[7][5]
-    #coded_message[7][7] = 1 - coded_message[7][7]
-    #print(coded_message[2])
+    coded_message[7][4] = 1 - coded_message[7][4]
+
     # kontrolne wyświetlenie popsutej wiadomości
     print(decode(coded_message))
     # sprawdzenie i korekcja błędów
