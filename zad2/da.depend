@@ -1,0 +1,109 @@
+# depslib dependency file v1.0
+1554818910 source:d:\tele\da\src\checksum.cpp
+	"checksum.h"
+	<iostream>
+
+1554818924 d:\tele\da\include\checksum.h
+	"ByteVector.h"
+
+1554819076 d:\tele\da\include\bytevector.h
+	<cstdint>
+	<vector>
+
+1554818959 source:d:\tele\da\src\readerwriter.cpp
+	"ReaderWriter.h"
+
+1554818954 d:\tele\da\include\readerwriter.h
+	"ByteVector.h"
+	<string>
+	<stdexcept>
+	<windows.h>
+
+1554818988 source:d:\tele\da\src\receiver.cpp
+	"Receiver.h"
+	"ReaderWriter.h"
+	"signals.h"
+	<chrono>
+	<windows.h>
+
+1554818980 d:\tele\da\include\receiver.h
+	"ByteVector.h"
+	"checksum.h"
+	"ReaderWriter.h"
+
+1554819043 d:\tele\da\include\signals.h
+	"ByteVector.h"
+
+1554819014 source:d:\tele\da\src\transmitter.cpp
+	"Transmitter.h"
+	"signals.h"
+	<cmath>
+
+1554819020 d:\tele\da\include\transmitter.h
+	"ByteVector.h"
+	"checksum.h"
+	"ReaderWriter.h"
+
+1554819496 source:d:\tele\da\main.cpp
+	<iostream>
+	<fstream>
+	<string>
+	"ReaderWriter.h"
+	"Transmitter.h"
+	"Receiver.h"
+	"signals.h"
+
+1554815896 source:f:\studia\teklekomunikacja\odpowiedz\zad2\main.cpp
+	<iostream>
+	<fstream>
+	<string>
+	"ReaderWriter.h"
+	"Transmitter.h"
+	"Receiver.h"
+	"signals.h"
+
+1554815354 f:\studia\teklekomunikacja\odpowiedz\zad2\include\readerwriter.h
+	"ByteVector.h"
+	<string>
+	<stdexcept>
+	<windows.h>
+
+1554815476 f:\studia\teklekomunikacja\odpowiedz\zad2\include\bytevector.h
+	<cstdint>
+	<vector>
+
+1554815420 f:\studia\teklekomunikacja\odpowiedz\zad2\include\transmitter.h
+	"ByteVector.h"
+	"checksum.h"
+	"ReaderWriter.h"
+
+1554815324 f:\studia\teklekomunikacja\odpowiedz\zad2\include\checksum.h
+	"ByteVector.h"
+
+1554815380 f:\studia\teklekomunikacja\odpowiedz\zad2\include\receiver.h
+	"ByteVector.h"
+	"checksum.h"
+	"ReaderWriter.h"
+
+1554815443 f:\studia\teklekomunikacja\odpowiedz\zad2\include\signals.h
+	"ByteVector.h"
+
+1554815310 source:f:\studia\teklekomunikacja\odpowiedz\zad2\src\checksum.cpp
+	"checksum.h"
+	<iostream>
+
+1554815359 source:f:\studia\teklekomunikacja\odpowiedz\zad2\src\readerwriter.cpp
+	"ReaderWriter.h"
+
+1554815388 source:f:\studia\teklekomunikacja\odpowiedz\zad2\src\receiver.cpp
+	"Receiver.h"
+	"ReaderWriter.h"
+	"signals.h"
+	<chrono>
+	<windows.h>
+
+1554815414 source:f:\studia\teklekomunikacja\odpowiedz\zad2\src\transmitter.cpp
+	"Transmitter.h"
+	"signals.h"
+	<cmath>
+
