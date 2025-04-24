@@ -9,7 +9,7 @@ using ByteVector = std::vector<uint8_t>;
 // Metoda odpowiadająca za wysyłanie pliku przez port szeregowy
 void Transmitter::sendFile(ByteVector data, int checksumMode) {
     // Oczekiwanie na sygnał od odbiornika, zależnie od wybranego trybu sumy kontrolnej
-    cout << "Oczekiwanie na gotowość odbiornika..." << endl;
+    cout << "Oczekiwanie na gotowosc odbiornika..." << endl;
     if (checksumMode == ALGEBRAIC_CHECKSUM)
         while (readerWriter->read() != NAK);
     else
@@ -40,7 +40,7 @@ void Transmitter::sendFile(ByteVector data, int checksumMode) {
         };
 
         // Wysyłanie nagłówka i danych bloku
-        cout << "Wysyłanie bloku " << blockIdx + 1 << " z " << totalBlocks << "..." << endl;
+        cout << "Wysylanie bloku " << blockIdx + 1 << " z " << totalBlocks << "..." << endl;
         readerWriter->write(header);
         readerWriter->write(block);
 
