@@ -60,7 +60,7 @@ void Transmitter::sendFile(ByteVector data, int checksumMode) {
         } else if (response == CAN) {
             throw ConnectionBrokenError("Połączenie anulowane przez odbiornik!");
         } else if (response != ACK) {
-            throw ConnectionBrokenError("Błąd protokołu przy potwierdzeniu bloku!");
+            //throw ConnectionBrokenError("Błąd protokołu przy potwierdzeniu bloku!");
         } else {
             cout << "Blok " << blockIdx + 1 << " wyslany pomyslnie!" << endl;
         }
