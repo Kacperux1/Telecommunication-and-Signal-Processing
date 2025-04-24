@@ -110,7 +110,7 @@ def main():
     if not filename.endswith(".txt"):
         raise ValueError("Niewłaściwy format pliku!")
     # wczytanie pliku
-    with open(filename, "r", encoding="ascii") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         message = file.read()
     # wyswietlenie wczytanej wiadomości
     print(message)

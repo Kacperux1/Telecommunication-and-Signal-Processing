@@ -6,47 +6,61 @@
 using namespace std;
 using ByteVector = std::vector<uint8_t>;
 
-void Transmitter::sendFile(ByteVector data, int mode){
-	//oczekiwanie na odbiornik
-	if(mode == ALGEBRAIC_CHECKSUM)
-		while(readerWriter->read() != NAK);
-	else
-		while(readerWriter->read() != C);
-	//rozpoczynanie nadawania
-	int noOfBlocks = (int)ceil(data.size() / 128.0);
-	for(int blockIndex = 0; blockIndex < noOfBlocks; blockIndex++){
-		//wyodrebnianie bloku
-		ByteVector::iterator blockBegin = data.begin() + blockIndex * 128;
-		ByteVector::iterator blockEnd;
-		if(data.end() - blockBegin <= 128)
-			blockEnd = data.end();
-		else
-			blockEnd = data.begin() + (blockIndex + 1) * 128;
-		ByteVector block(blockBegin, blockEnd);
-		//dopelnianie zerami
-		if(block.size() < 128)
-			block.insert(block.end(), 128 - block.size(), 0);
-		//tworzenie naglowka
-		ByteVector header = {
-			SOH,
-			(uint8_t)(blockIndex + 1),
-			(uint8_t)(255 - (blockIndex + 1))};
-		//wysylanie
-		readerWriter->write(header);
-		readerWriter->write(block);
-		if(mode == ALGEBRAIC_CHECKSUM)
-			readerWriter->write(ByteVector({algebraicChecksum(block)}));
-		else
-			readerWriter->write(crc16Checksum(block));
-		//odbieranie potwierdzenia
-        uint8_t response = readerWriter->read();
-		if(response == NAK){
-			blockIndex--;
-		}else if(response == CAN){
-			throw ConnectionBrokenError("Connection canceled!");
-		}else if(response != ACK){
-			throw ConnectionBrokenError("Protocol error!");
-		}
-	}
-	readerWriter->write(ByteVector({EOT}));
+void Transmitter::sendFile(ByteVector inputData, int checksumMode) {
+
+    // Czekamy na sygnał od odbiornika: NAK (dla sumy) lub 'C' (dla CRC)
+    uint8_t syncChar = (checksumMode == ALGEBRAIC_CHECKSUM) ? NAK : C;
+    while (readerWriter->read() != syncChar);
+
+    // Dzielimy dane na bloki po 128 bajtów
+    int totalBlocks = static_cast<int>(ceil(inputData.size() / 128.0));
+
+    for (int i = 0; i < totalBlocks; ++i) {
+
+        auto blockStart = inputData.begin() + i * 128;
+        auto blockEnd = (inputData.end() - blockStart <= 128) ? inputData.end() : blockStart + 128;
+
+        ByteVector chunk(blockStart, blockEnd);
+
+        // Uzupełniamy blok zerami, jeśli krótszy niż 128
+        if (chunk.size() < 128) {
+            chunk.resize(128, 0x00);
+        }
+
+        // Nagłówek: SOH, numer bloku, jego uzupełnienie do 255
+        ByteVector header = {
+                SOH,
+                static_cast<uint8_t>(i + 1),
+                static_cast<uint8_t>(255 - (i + 1))
+        };
+
+        // Wysyłanie nagłówka, bloku i sumy kontrolnej
+        readerWriter->write(header);
+        readerWriter->write(chunk);
+
+        if (checksumMode == ALGEBRAIC_CHECKSUM) {
+            readerWriter->write(ByteVector{algebraicChecksum(chunk)});
+        } else {
+            ByteVector crc = crc16Checksum(chunk);
+            readerWriter->write(crc);
+        }
+
+        // Czekamy na odpowiedź: ACK, NAK lub CAN
+        uint8_t reply = readerWriter->read();
+
+        if (reply == ACK) {
+            // OK, przechodzimy dalej
+            continue;
+        } else if (reply == NAK) {
+            // Błąd - ponawiamy ten sam blok
+            --i;
+        } else if (reply == CAN) {
+            throw ConnectionBrokenError("Przerwane połączenie!");
+        } else {
+            throw ConnectionBrokenError(" Błąd protokołu.");
+        }
+    }
+
+    // Po wysłaniu wszystkich bloków - koniec transmisji
+    readerWriter->write(ByteVector{EOT});
 }

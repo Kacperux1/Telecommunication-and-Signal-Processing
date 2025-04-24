@@ -4,51 +4,75 @@
 #include "include/ReaderWriter.h"
 #include "include/Transmitter.h"
 #include "include/Receiver.h"
+
 using namespace std;
 
-const int SENDING_MODE = 0;
-const int RECEIVING_MODE = 1;
+int main() {
+    // Tworzymy obiekt do komunikacji przez port COM2
+    auto connection = std::make_unique<ReaderWriter>("COM2");
 
-int main(){
-    auto rw = std::make_unique<ReaderWriter>("COM2");
+    int operationMode = 0;
+    int controlMode = 0;
 
-	int workingMode;
-	int checksumMode;
-	cout << "Wybierz tryb pracy:\n"
-		"0) wysylanie\n"
-		"1) odbieranie\n";
-	cin >> workingMode;
-	checksumMode=0;
-	cin.get();
-	if((workingMode != 0 && workingMode != 1) || (checksumMode != 0 && checksumMode != 1)){
-		cout << "Niepoprawne parametry!" << endl;
-		return 0;
-	}
+    // Wybór trybu pracy: nadawanie albo odbiór
+    cout << "Wybierz tryb pracy:\n"
+            "0) wysyłanie\n"
+            "1) odbieranie\n";
+    cin >> operationMode;
 
-	if(workingMode == 0){
-		cout << "Podaj sciezke do pliku: " << endl;
-		string filename;
-		getline(cin, filename);
-		ifstream is(filename, ios::binary);
-		ByteVector data;
-		while(is){
-            uint8_t b = is.get();
-			if(is)
-				data.push_back(b);
-		}
-		is.close();
-		Transmitter tr(std::move(rw));
-		tr.sendFile(data, checksumMode);
-	}
-	if(workingMode == 1){
-		cout << "Podaj nazwe pliku do odebrania: " << endl;
-		string filename;
-		getline(cin, filename);
-		Receiver re(std::move(rw));
-		ByteVector data = re.receiveFile(checksumMode);
-		ofstream os(filename, ios::binary);
-		os.write((char*)data.data(), data.size());
-		os.close();
-	}
+    // Wybór metody kontroli błędów
+    cout << "Wybierz tryb kontroli:\n"
+            "0) suma kontrolna\n"
+            "1) CRC\n";
+    cin >> controlMode;
 
+    cin.get(); // usuniecie znaku nowej linii
+
+    // Sprawdzenie poprawności opcji
+    if ((operationMode != 0 && operationMode != 1) || (controlMode != 0 && controlMode != 1)) {
+        cout << "Niepoprawne parametry!" << endl;
+        return 1;
+    }
+
+    if (operationMode == 0) {
+        // TRYB NADAWANIA
+        cout << "Podaj nazwę pliku do wysłania: ";
+        string inputFileName;
+        getline(cin, inputFileName);
+
+        ifstream inputFile(inputFileName, ios::binary);
+        if (!inputFile.is_open()) {
+            cerr << "Nie udało się otworzyć pliku!" << endl;
+            return 1;
+        }
+
+        ByteVector fileData;
+        // Wczytujemy bajty z pliku do wektora
+        while (inputFile) {
+            uint8_t byte = inputFile.get();
+            if (inputFile)
+                fileData.push_back(byte);
+        }
+        inputFile.close();
+
+        // Tworzymy nadajnik i wysyłamy dane
+        Transmitter transmitter(std::move(connection));
+        transmitter.sendFile(fileData, controlMode);
+    } else {
+        // TRYB ODBIERANIA
+        cout << "Podaj nazwę pliku do odebrania: ";
+        string outputFileName;
+        getline(cin, outputFileName);
+
+        // Tworzymy odbiornik i odbieramy dane
+        Receiver receiver(std::move(connection));
+        ByteVector receivedData = receiver.receiveFile(controlMode);
+
+        // Zapisujemy odebrane dane do pliku
+        ofstream outputFile(outputFileName, ios::binary);
+        outputFile.write(reinterpret_cast<char*>(receivedData.data()), receivedData.size());
+        outputFile.close();
+    }
+
+    return 0;
 }

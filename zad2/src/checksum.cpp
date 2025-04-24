@@ -4,42 +4,13 @@
 #include <cstdint>
 
 using namespace std;
-using ByteVector = std::vector<uint8_t>;
+typedef std::vector<uint8_t> ByteVector;
 
-//sta³a reprezentuj¹ca wielomian dla kodu CRC-16-CCITT
+//stala reprezentujaca wielomian dla kodu CRC-16-CCITT
 const dword POLY = 0x011021;
 const uint8_t POLY_LENGTH = 17;
 
-//wypisuje wektor bajtów
-void printBinary(const ByteVector& bytes){
-    for(int bitIndex = 0; bitIndex < bytes.size() * 8; bitIndex++){
-        int noOfByte = bitIndex / 8;
-        int noOfBit = bitIndex % 8;
-        bool bit = (bool)(bytes[noOfByte] & (1 << (7 - noOfBit)));
-        if(bit){
-            cout << "1";
-        }else{
-            cout << "0";
-        }
-    }
-}
-
-//wypisuje 4-bajtowe s³owo od pierwszego bitu 1
-void printBinary(dword bytes){
-    bool start = false;
-    for(int bitIndex = 0; bitIndex < sizeof(bytes) * 8; bitIndex++){
-        bool bit = bytes & (1 << ((sizeof(bytes) * 8) - 1 - bitIndex));
-        if(bit){
-            cout << "1";
-            start = true;
-        }else{
-            if(start)
-                cout << "0";
-        }
-    }
-}
-
-//oblicza sumê algebraiczn¹
+//oblicza sume algebraiczna ("podstawowa sume kontrolna")
 uint8_t algebraicChecksum(const ByteVector& bytes){
 	int sum = 0;
 	for(uint8_t addend : bytes){
@@ -60,15 +31,6 @@ ByteVector crc16Checksum(const ByteVector& bytes){
         bool bit = (bool)(a[noOfByte] & (1 << (7 - noOfBit)));
         if(bit){
             dword toXor = POLY << (7 - noOfBit);
-            //------
-            /*printBinary(a);
-            cout << endl;
-            for(int i = 0; i < bitIndex; i++){
-                cout << " ";
-            }
-            printBinary(toXor);
-            cout << endl << endl;*/
-            //------
             a[noOfByte] ^= (uint8_t)((toXor >> 16) & 0x0000ff);
             a[noOfByte + 1] ^= (uint8_t)((toXor >> 8) & 0x0000ff);
             a[noOfByte + 2] ^= (uint8_t)((toXor >> 0) & 0x0000ff);
