@@ -6,16 +6,16 @@
 using namespace std;
 using ByteVector = std::vector<uint8_t>;
 
-//sta≥a reprezentujπca wielomian dla kodu CRC-16-CCITT
-const dword POLY = 0x011021;
-const uint8_t POLY_LENGTH = 17;
+// Sta?a reprezentuj?ca wielomian dla kodu CRC-16-CCITT
+const dword POLY = 0x011021;  // Wielomian dla CRC-16-CCITT
+const uint8_t POLY_LENGTH = 17;  // D?ugo?? wielomianu CRC w bitach (16 + 1 bit do uwzgl?dnienia)
 
-//wypisuje wektor bajtÛw
+// Wypisuje wektor bajt√≥w w postaci binarnej
 void printBinary(const ByteVector& bytes){
     for(int bitIndex = 0; bitIndex < bytes.size() * 8; bitIndex++){
         int noOfByte = bitIndex / 8;
         int noOfBit = bitIndex % 8;
-        bool bit = (bool)(bytes[noOfByte] & (1 << (7 - noOfBit)));
+        bool bit = (bool)(bytes[noOfByte] & (1 << (7 - noOfBit)));  // Sprawdzamy czy dany bit jest 1
         if(bit){
             cout << "1";
         }else{
@@ -24,11 +24,11 @@ void printBinary(const ByteVector& bytes){
     }
 }
 
-//wypisuje 4-bajtowe s≥owo od pierwszego bitu 1
+// Wypisuje 4-bajtowe s?owo od pierwszego bitu 1
 void printBinary(dword bytes){
-    bool start = false;
+    bool start = false;  // Flaga, kt√≥ra ?ledzi, czy rozpocz?to wypisywanie bit√≥w
     for(int bitIndex = 0; bitIndex < sizeof(bytes) * 8; bitIndex++){
-        bool bit = bytes & (1 << ((sizeof(bytes) * 8) - 1 - bitIndex));
+        bool bit = bytes & (1 << ((sizeof(bytes) * 8) - 1 - bitIndex));  // Sprawdzamy bit
         if(bit){
             cout << "1";
             start = true;
@@ -39,40 +39,38 @@ void printBinary(dword bytes){
     }
 }
 
-//oblicza sumÍ algebraicznπ
+// Funkcja obliczaj?ca sum? algebraiczn? (prosta suma wszystkich bajt√≥w modulo 256)
 uint8_t algebraicChecksum(const ByteVector& bytes){
-	int sum = 0;
-	for(uint8_t addend : bytes){
-		sum += addend;
-		sum %= 256;
-	}
-	return (uint8_t)sum;
+    int sum = 0;
+    for(uint8_t addend : bytes){
+        sum += addend;
+        sum %= 256;  // Dzia?amy w modulo 256, poniewa? suma nie mo?e przekroczy? 255
+    }
+    return (uint8_t)sum;  // Zwracamy wynik jako 8-bitow? liczb?
 }
 
-//oblicza CRC-16-CCITT (wykorzystywane w XMODEM)
+// Funkcja obliczaj?ca CRC-16-CCITT (zastosowanie w protokole XMODEM)
 ByteVector crc16Checksum(const ByteVector& bytes){
-    ByteVector a(bytes);
-    a.push_back(0); a.push_back(0);
+    ByteVector a(bytes);  // Tworzymy kopi? wektora z danymi
+    a.push_back(0); a.push_back(0);  // Dodajemy dwa bajty wype?niaj?ce na ko?cu (s?u?? do przechowywania sumy CRC)
 
-    for(int bitIndex = 0; bitIndex < bytes.size() * 8 - POLY_LENGTH; bitIndex++){
-        int noOfByte = bitIndex / 8;
-        int noOfBit = bitIndex % 8;
-        bool bit = (bool)(a[noOfByte] & (1 << (7 - noOfBit)));
+    // P?tla przechodz?ca przez wszystkie bity danych
+    for(int bitIndex = 0; bitIndex < bytes.size() * 8; bitIndex++){
+        int noOfByte = bitIndex / 8;  // Indeks bajtu
+        int noOfBit = bitIndex % 8;   // Indeks bitu w obr?bie bajtu
+        bool bit = (bool)(a[noOfByte] & (1 << (7 - noOfBit)));  // Sprawdzamy, czy dany bit w bajcie jest r√≥wny 1
+
         if(bit){
-            dword toXor = POLY << (7 - noOfBit);
-            //------
-            /*printBinary(a);
-            cout << endl;
-            for(int i = 0; i < bitIndex; i++){
-                cout << " ";
-            }
-            printBinary(toXor);
-            cout << endl << endl;*/
-            //------
+            dword toXor = POLY << (7 - noOfBit);  // Przygotowujemy wielomian do XOR-owania (przesuni?ty w zale?no?ci od bitu)
+
+            // Wykonujemy operacj? XOR z wielomianem przesuni?tym na odpowiedni? pozycj?
             a[noOfByte] ^= (uint8_t)((toXor >> 16) & 0x0000ff);
             a[noOfByte + 1] ^= (uint8_t)((toXor >> 8) & 0x0000ff);
             a[noOfByte + 2] ^= (uint8_t)((toXor >> 0) & 0x0000ff);
         }
     }
+
+    // Zwracamy dwa ostatnie bajty, kt√≥re zawieraj? wynik CRC
     return ByteVector(a.end() - 2, a.end());
 }
+
