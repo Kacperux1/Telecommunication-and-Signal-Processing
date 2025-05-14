@@ -1,8 +1,9 @@
 import heapq
-from collections import defaultdict, Counter
+from collections import  Counter
 import sender
 import receiver
-
+import threading
+import time
 
 
 
@@ -52,8 +53,7 @@ def encode_text(text, codebook):
 
 
 def main():
-    import threading
-    import time
+
     host = '0.0.0.0'
     port = 12345
 
