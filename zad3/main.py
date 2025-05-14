@@ -4,8 +4,7 @@ import sender
 import receiver
 
 
-host = 'localhost'
-port = 12345
+
 
 # Węzeł drzewa Huffmana
 class Node:
@@ -55,14 +54,15 @@ def encode_text(text, codebook):
 def main():
     import threading
     import time
-
     host = '0.0.0.0'
     port = 12345
+
 
     mode = input("Wybierz tryb działania (send / receive): ").strip().lower()
 
     if mode == 'send':
         filename = input("Podaj nazwę pliku do wysłania (np. message.txt): ").strip()
+        host = input("Podaj adres IP odbiorcy:")
         if not filename.endswith(".txt"):
             raise ValueError("Niewłaściwy format pliku!")
 
