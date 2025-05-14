@@ -53,26 +53,74 @@ def encode_text(text, codebook):
 
 
 def main():
-    #filename = input("Podaj nazwę pliku:")
-    #print("wprowadzony plik: " + filename)
-    filename = "message.txt"
-    if not filename.endswith(".txt"):
-        raise ValueError("Niewłaściwy format pliku!")
-    # wczytanie pliku
-    with open(filename, "r", encoding="ascii") as file:
-        message = file.read()
-    # wyswietlenie wczytanej wiadomości
-    print(message)
+    import threading
+    import time
 
-    root = build_huffman_tree(message)
-    codebook = generate_codes(root)
+    host = '0.0.0.0'
+    port = 12345
 
-    print("Słownik kodowy Huffmana:")
-    for char, code in codebook.items():
-        print(f"'{char}': {code}")
+    mode = input("Wybierz tryb działania (send / receive): ").strip().lower()
 
-    encoded = encode_text(message, codebook)
-    print("\nZakodowany tekst binarnie:")
-    print(encoded)
+    if mode == 'send':
+        filename = input("Podaj nazwę pliku do wysłania (np. message.txt): ").strip()
+        if not filename.endswith(".txt"):
+            raise ValueError("Niewłaściwy format pliku!")
+
+        # Wczytanie wiadomości z pliku
+        with open(filename, "r", encoding="ascii") as file:
+            message = file.read()
+        print("Wiadomość do zakodowania:")
+        print(message)
+
+        # Kompresja Huffmana
+        root = build_huffman_tree(message)
+        codebook = generate_codes(root)
+        encoded = encode_text(message, codebook)
+
+        # Wyświetlenie danych
+        print("\nSłownik kodowy Huffmana:")
+        for char, code in codebook.items():
+            print(f"'{char}': {code}")
+
+        print("\nZakodowana wiadomość binarnie:")
+        print(encoded)
+
+        # Wysyłanie
+        sender.send(host, port, codebook, encoded)
+
+    elif mode == 'receive':
+        receiver.receive(host, port)
+
+    elif mode == 'both':
+        # Działa w obu trybach: najpierw startuje receiver w tle
+        threading.Thread(target=receiver.receive, args=(host, port), daemon=True).start()
+        time.sleep(1)  # chwilka na uruchomienie odbiornika
+
+        filename = input("Podaj nazwę pliku do wysłania (np. message.txt): ").strip()
+        if not filename.endswith(".txt"):
+            raise ValueError("Niewłaściwy format pliku!")
+
+        with open(filename, "r", encoding="ascii") as file:
+            message = file.read()
+        print("Wiadomość do zakodowania:")
+        print(message)
+
+        root = build_huffman_tree(message)
+        codebook = generate_codes(root)
+        encoded = encode_text(message, codebook)
+
+        print("\nSłownik kodowy Huffmana:")
+        for char, code in codebook.items():
+            print(f"'{char}': {code}")
+        print("\nZakodowana wiadomość binarnie:")
+        print(encoded)
+
+        sender.send(host, port, codebook, encoded)
+        time.sleep(2)  # czas na zakończenie odbioru
+
+    else:
+        print("Nieznany tryb. Użyj 'send' lub 'receive")
+
 
 main()
+

@@ -4,7 +4,7 @@
 #include <cstdint>
 
 using namespace std;
-using ByteVector = std::vector<uint8_t>;
+typedef std::vector<uint8_t> ByteVector;
 
 // Sta?a reprezentuj?ca wielomian dla kodu CRC-16-CCITT
 const dword POLY = 0x011021;  // Wielomian dla CRC-16-CCITT
