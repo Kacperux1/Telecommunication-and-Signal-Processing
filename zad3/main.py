@@ -69,6 +69,9 @@ def main():
         # Wczytanie wiadomości z pliku
         with open(filename, "r", encoding="ascii") as file:
             message = file.read()
+        if len(message)<2:
+            print("Wiadomość musi być złozona co najmniej z dwóch znaków!")
+            return 1
         print("Wiadomość do zakodowania:")
         print(message)
 
@@ -90,36 +93,6 @@ def main():
 
     elif mode == 'receive':
         receiver.receive(host, port)
-
-    elif mode == 'both':
-        # Działa w obu trybach: najpierw startuje receiver w tle
-        threading.Thread(target=receiver.receive, args=(host, port), daemon=True).start()
-        time.sleep(1)  # chwilka na uruchomienie odbiornika
-
-        filename = input("Podaj nazwę pliku do wysłania (np. message.txt): ").strip()
-        if not filename.endswith(".txt"):
-            raise ValueError("Niewłaściwy format pliku!")
-
-        with open(filename, "r", encoding="ascii") as file:
-            message = file.read()
-        if len(message)<2:
-            print("Wiadomość musi być złozona co najmniej z dwóch znaków!")
-            return 1
-        print("Wiadomość do zakodowania:")
-        print(message)
-
-        root = build_huffman_tree(message)
-        codebook = generate_codes(root)
-        encoded = encode_text(message, codebook)
-
-        print("\nSłownik kodowy Huffmana:")
-        for char, code in codebook.items():
-            print(f"'{char}': {code}")
-        print("\nZakodowana wiadomość binarnie:")
-        print(encoded)
-
-        sender.send(host, port, codebook, encoded)
-        time.sleep(2)  # czas na zakończenie odbioru
 
     else:
         print("Nieznany tryb. Użyj 'send' lub 'receive")
