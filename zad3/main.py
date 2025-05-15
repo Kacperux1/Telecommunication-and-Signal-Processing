@@ -102,6 +102,9 @@ def main():
 
         with open(filename, "r", encoding="ascii") as file:
             message = file.read()
+        if len(message)<2:
+            print("Wiadomość musi być złozona co najmniej z dwóch znaków!")
+            return 1
         print("Wiadomość do zakodowania:")
         print(message)
 
