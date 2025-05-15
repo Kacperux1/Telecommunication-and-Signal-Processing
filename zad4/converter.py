@@ -16,8 +16,17 @@ def record_audio(filename, duration, samplerate, bitdepth):
     wav.write(filename, samplerate, audio)
     print("Zapisano:", filename)
 
+
 def play_audio(filename):
     samplerate, data = wav.read(filename)
     sd.play(data, samplerate)
     sd.wait()
     print("Odtwarzanie zakończone.")
+
+
+def calculate_snr(reference, test):
+    noise = reference[:len(test)] - test
+    signal_power = np.mean(reference[:len(test)] ** 2)
+    noise_power = np.mean(noise ** 2)
+    snr = 10 * np.log10(signal_power / noise_power)
+    return snr
