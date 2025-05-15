@@ -37,13 +37,16 @@ def build_huffman_tree(text):
 
 
 # Generowanie kodów (rekurencyjnie)
-def generate_codes(node, prefix="", codebook={}):
+def generate_codes(node, prefix="", codebook={}, first=1):
     if node is None:
         return
+    if node.left is None and node.right is None and first == 1:
+        codebook[node.char] = "0"
+        return codebook
     if node.char is not None:
         codebook[node.char] = prefix
-    generate_codes(node.left, prefix + "0", codebook)
-    generate_codes(node.right, prefix + "1", codebook)
+    generate_codes(node.left, prefix + "0", codebook, 0)
+    generate_codes(node.right, prefix + "1", codebook, 0)
     return codebook
 
 
