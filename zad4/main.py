@@ -1,10 +1,12 @@
-from converter import record_audio, play_audio
+from converter import record_audio, play_audio, calculate_snr
+import soundfile as sf
 
 def main():
     print("Co chcesz zrobić?")
     print("1. Nagrać dźwięk (A/C)")
     print("2. Odtworzyć dźwięk (C/A)")
-    choice = input("Wybierz [1/2]: ")
+    print("3. oblicz współczynnik SNR")
+    choice = input("Wybierz [1/2/3]: ")
 
     filename = input("Podaj nazwę pliku WAV (np. dzwiek.wav): ")
 
@@ -26,6 +28,18 @@ def main():
             print("Nie znaleziono pliku:", filename)
         except Exception as e:
             print("Wystąpił błąd podczas odtwarzania:", e)
+
+    elif choice == '3':
+        ref_file = input("Podaj nazwę pliku referencyjnego: ").strip()
+        test_file = input("Podaj nazwę pliku testowego: ").strip()
+        try:
+            ref_signal, _ = sf.read(ref_file, dtype='float32')
+            test_signal, _ = sf.read(test_file, dtype='float32')
+
+            snr = calculate_snr(ref_signal, test_signal)
+            print(f"SNR między '{ref_file}' i '{test_file}': {snr:.2f} dB")
+        except Exception as e:
+            print(f"Błąd przy liczeniu SNR: {e}")
     else:
         print("Niepoprawny wybór.")
 
